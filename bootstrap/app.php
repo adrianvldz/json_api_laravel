@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ValidateJsonApiDocument;
 use Illuminate\Foundation\Application;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use App\Http\Middleware\ValidateJsonApiHeaders;
@@ -16,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->append(ValidateJsonApiHeaders::class);
+        $middleware->append(ValidateJsonApiDocument::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         return \App\Exceptions\Handler::class;
