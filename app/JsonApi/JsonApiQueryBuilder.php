@@ -4,6 +4,7 @@ namespace App\JsonApi;
 
 use Closure;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Builder;
 
 class JsonApiQueryBuilder
 {
@@ -32,6 +33,26 @@ class JsonApiQueryBuilder
        };
     } 
 
+    public function allowedFilters(): Closure
+    {
+        
+
+        return function ($allowedFilters){
+            /** @var Builder $this */ 
+            foreach(request('filter', []) as $filter => $value){
+
+                abort_unless(in_array($filter, $allowedFilters), 400);
+
+                $this->hasNamedScope($filter)
+                 ? $this->{$filter}($value)
+                 : $this->where($filter, 'LIKE', '%'.$value.'%');
+                
+            }
+
+            return $this;
+        };
+    }
+
     public function jsonPaginate(): Closure
     {
         return function(){
@@ -42,7 +63,7 @@ class JsonApiQueryBuilder
                 $pageName = 'page[number]',
                 $page = request('page.number', 1),
                 $total = null
-            )->appends(request()->only( 'sort', 'page.size'));
+            )->appends(request()->only( 'sort', 'filter', 'page.size'));
            };
 
     }
