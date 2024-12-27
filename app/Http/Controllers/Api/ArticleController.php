@@ -10,22 +10,27 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ArticleResource;
 use App\Http\Requests\SaveArticleRequest;
 use App\Http\Resources\ArticleCollection;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class ArticleController extends Controller
 {
-    public function show(Article $article): ArticleResource{
-        
+    public function show($article): JsonResource{
+        $article = Article::where('slug', $article)
+                ->sparseFieldSet()
+                ->firstOrFail();
         return ArticleResource::make($article);
     }
 
-    public function index(): ArticleCollection{
+    public function index(): AnonymousResourceCollection{
 
         $articles = Article::query()->allowedFilters(['title', 'content', 'year', 'month'])
         ->allowedSorts(['title', 'content'])
+        ->sparseFieldSet()
         ->jsonPaginate();
        
 
-        return ArticleCollection::make($articles);
+        return ArticleResource::collection($articles);
     }
 
     public function store(SaveArticleRequest $request){
