@@ -51,11 +51,61 @@ class JsonApiTestResponse
             }
     
     
-            $this->assertHeader(
+           return $this->assertHeader(
                 'content-type', 'application/vnd.api+json'
             )->assertStatus(422);
          
          };
+
+    }
+
+    public function assertJsonApiResource(): Closure
+    {
+        return function ($model, $attributes){
+            /** @var TestResponse $this */
+           return $this->assertJson([
+                'data' => [
+                    'type' => $model->getResourceType(),
+                    'id' => (string) $model->getRouteKey(),
+                    'attributes' => $attributes,
+                    'links' => [
+                        'self' => route('api.v1.'.$model->getResourceType().'.show', $model)
+                    ]
+                ]
+            ])->assertHeader(
+                'Location',
+                route('api.v1.'.$model->getResourceType().'.show', $model)
+            );
+        };
+
+    }
+
+    public function assertJsonApiResourceCollection(): Closure
+    {
+        return function ($models, $attributesKeys){
+            /** @var TestResponse $this */
+
+            $this->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'attributes' => $attributesKeys
+                    ]
+                ]
+            ]);
+
+            foreach($models as $model){
+                $this->assertJsonFragment([
+
+                    'type' => $model->getResourceType(),
+                    'id' => (string) $model->getRouteKey(),
+                    'links' => [
+                        'self' => route('api.v1.'.$model->getResourceType().'.show', $model)
+                    ]
+                ]);
+            }
+
+            return $this;
+        };
 
     }
     
