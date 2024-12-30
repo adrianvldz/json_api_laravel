@@ -36,13 +36,14 @@ class IncludeCategoryTest extends TestCase
      /** @test */
      public function can_include_related_categories_of_multiple_articles(): void
      {
-         $article = Article::factory()->create();
-         $article2 = Article::factory()->create();
+         $article = Article::factory()->create()->load('category');
+         $article2 = Article::factory()->create()->load('category');
  
          $url = route('api.v1.articles.index', [
              'include' => 'category'
          ]);
- 
+         
+
          $this->getJson($url)->assertJson([
              'included' => [
                  [
@@ -62,4 +63,24 @@ class IncludeCategoryTest extends TestCase
              ]
          ]);
      }
+
+        /** @test */
+    public function cannot_include_unknown_relationships(): void
+    {
+        $article = Article::factory()->create();
+
+        $url = route('api.v1.articles.show', [
+            'article' => $article,
+            'include' => 'unknown'
+        ]);
+
+        $this->getJson($url)->assertStatus(400);
+
+        $url = route('api.v1.articles.index', [
+            'include' => 'unknown'
+        ]);
+
+        $this->getJson($url)->assertStatus(400);
+    }
+
 }

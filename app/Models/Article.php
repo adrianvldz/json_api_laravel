@@ -58,5 +58,13 @@ class Article extends Model
 
     }
 
+    public function scopeCategories(Builder $query, $categories)
+    {
+        $categoriesSlugs = explode(',', $categories);
+        $query->whereHas('category', function($q) use ($categoriesSlugs){
+            $q->whereIn('slug', $categoriesSlugs);
+        });
+    }
+
 
 }

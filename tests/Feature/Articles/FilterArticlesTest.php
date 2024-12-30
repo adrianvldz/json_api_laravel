@@ -4,6 +4,7 @@ namespace Tests\Feature\Articles;
 
 use Tests\TestCase;
 use App\Models\Article;
+use App\Models\Category;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -107,6 +108,27 @@ class FilterArticlesTest extends TestCase
          ->assertSee('Another Article from month 3')
          ->assertDontSee('Article from month 1');
      }
+
+      /** @test */
+      public function can_filter_articles_by_category(): void
+      {
+          Article::factory()->count(2)->create();
+          $cat1 = Category::factory()->hasArticles(3)->create(['slug' => 'cat-1']);
+          $cat2 = Category::factory()->hasArticles()->create(['slug' => 'cat-2']);
+          
+  
+          $url = route('api.v1.articles.index', [
+              'filter' => [
+                  'categories' => 'cat-1'
+              ]
+          ]);
+  
+          $this->getJson($url)->assertJsonCount(3, 'data')
+          ->assertSee($cat1->articles[0]->title)
+          ->assertSee($cat1->articles[1]->title)
+          ->assertSee($cat1->articles[2]->title)
+          ->assertDontSee($cat2->articles[0]->title);
+      }
 
       /** @test */
       public function cannot_filter_articles_by_unknown_filters(): void
