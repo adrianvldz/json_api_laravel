@@ -4,6 +4,7 @@ namespace Tests\Feature\Articles;
 
 use Tests\TestCase;
 use App\Models\Article;
+use App\Models\Category;
 use Illuminate\Testing\TestResponse;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,10 +17,14 @@ class CreateArticleTest extends TestCase
     /** @test */
     public function can_create_articles(): void
     {
+        $category = Category::factory()->create();
         $response = $this->postJson(route('api.v1.articles.store'), [
             'title' => 'Nuevo artículo',
             'slug' => 'nuevo-articulo',
-            'content' => 'Contenido del articulo'
+            'content' => 'Contenido del articulo',
+            '_relationships' => [
+                'category' => $category
+            ]
         ])->assertCreated();
 
         $article = Article::first();
@@ -146,4 +151,29 @@ class CreateArticleTest extends TestCase
             'slug' => 'nuevo-articulo'
         ])->assertJsonApiValidationErrors('content');
     }
+
+      /** @test */
+      public function category_relationship_is_required(): void
+      {
+          $this->postJson(route('api.v1.articles.store'), [
+              'title' => 'Nuevo Artículo',
+              'slug' => 'nuevo-articulo',
+              'content' => 'Contenido del artículo',
+
+          ])->assertJsonApiValidationErrors('data.relationships.category.data.id');
+      }
+
+        /** @test */
+        public function category_must_exist_in_database(): void
+        {
+            $this->postJson(route('api.v1.articles.store'), [
+                'title' => 'Nuevo Artículo',
+                'slug' => 'nuevo-articulo',
+                'content' => 'Contenido del artículo',
+                '_relationships' => [
+                    'category' => Category::factory()->make()
+                ]
+  
+            ])->assertJsonApiValidationErrors('data.relationships.category.data.id');
+        }
 }
