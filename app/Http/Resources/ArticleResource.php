@@ -19,6 +19,18 @@ class ArticleResource extends JsonResource
             
        ];
     }
+
+    public function getRelationshipLinks(): array
+    {
+        return ['category'];
+    }
+
+    public function getIncludes(): array
+    {
+        return [
+            CategoryResource::make($this->resource->category)
+        ];
+    }
     
  
 

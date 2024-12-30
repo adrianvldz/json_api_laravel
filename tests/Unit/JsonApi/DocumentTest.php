@@ -3,7 +3,6 @@
 namespace Tests\Unit\JsonApi;
 
 use App\JsonApi\Document;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 
@@ -21,7 +20,7 @@ class DocumentTest extends TestCase
             ->id('article-id')
             ->attributes([
                 'title' => 'Article title'
-            ])->relationships([
+            ])->relationshipsData([
                 'category' => $category
             ])->toArray();
 

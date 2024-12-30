@@ -1,6 +1,8 @@
 <?php
 
 namespace App\JsonApi\Traits;
+
+use App\Http\Resources\CategoryResource;
 use App\JsonApi\Document;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -11,14 +13,32 @@ trait JsonApiResource
 
     public function toArray(Request $request): array
     {
+
+        if($request->filled('include')){
+
+            $this->with['included'] = $this->getIncludes();
+        }
+
+
         return Document::type($this->getResourceType())
         ->id($this->resource->getRouteKey())
         ->attributes($this->filterAttributes($this->toJsonApi()))
+        ->relationshipLinks($this->getRelationshipLinks())
         ->links([
             'self' => route('api.v1.'.$this->getResourceType().'.show', $this->resource)
 
         ])->get('data');
  
+    }
+
+    public function getIncludes(): array
+    {
+        return [];
+    }
+
+    public function getRelationshipLinks() : array
+    {
+        return [];
     }
 
     public function withResponse($request, $response){
@@ -48,11 +68,19 @@ trait JsonApiResource
         });
     }
 
-    public static function collection($resource): AnonymousResourceCollection
+    public static function collection($resources): AnonymousResourceCollection
     {
-        $collection = parent::collection($resource);
+        $collection = parent::collection($resources);
+        if(request()->filled('include')){
 
-        $collection->with['links'] = ['self' => $resource->path()];
+            foreach($resources as $resource){
+                foreach($resource->getIncludes() as $include){
+                    $collection->with['included'][] = $include;
+                }
+            }
+        }
+
+        $collection->with['links'] = ['self' => $resources->path()];
 
         return $collection;
     }

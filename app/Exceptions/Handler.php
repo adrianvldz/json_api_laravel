@@ -9,8 +9,8 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
 class Handler extends ExceptionHandler
 {
-    protected function invalidJson($request, ValidationException $exception)
+    protected function invalidJson($request, ValidationException $exception): JsonApiValidationErrorResponse
     {
-       return new JsonApiValidationErrorResponse($exception);
+        return new JsonApiValidationErrorResponse($exception);
     }
 }

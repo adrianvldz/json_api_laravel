@@ -14,41 +14,50 @@ class CreateArticleTest extends TestCase
     use RefreshDatabase;
 
 
-    /** @test */
-    public function can_create_articles(): void
-    {
-        $category = Category::factory()->create();
-        $response = $this->postJson(route('api.v1.articles.store'), [
-            'title' => 'Nuevo artículo',
-            'slug' => 'nuevo-articulo',
-            'content' => 'Contenido del articulo',
-            '_relationships' => [
-                'category' => $category
-            ]
-        ])->assertCreated();
+   /** @test */
+public function can_create_articles(): void
+{
+    $category = Category::factory()->create();
+    $response = $this->postJson(route('api.v1.articles.store'), [
+        'title' => 'Nuevo artículo',
+        'slug' => 'nuevo-articulo',
+        'content' => 'Contenido del articulo',
+        '_relationships' => [
+            'category' => $category
+        ]
+    ])->assertCreated();
 
-        $article = Article::first();
+    $article = Article::first();
 
-        $response->assertHeader(
-            'Location',
-            route('api.v1.articles.show', $article)
-        );
+    $response->assertHeader(
+        'Location',
+        route('api.v1.articles.show', $article)
+    );
 
-        $response->assertExactJson([
-            'data' => [
-                'type' => 'articles',
-                'id' => (string) $article->getRouteKey(),
-                'attributes' => [
-                    'title' => 'Nuevo artículo',
-                    'slug' => 'nuevo-articulo',
-                    'content' => 'Contenido del articulo'
+    $response->assertExactJson([
+        'data' => [
+            'type' => 'articles',
+            'id' => (string) $article->getRouteKey(),
+            'attributes' => [
+                'title' => 'Nuevo artículo',
+                'slug' => 'nuevo-articulo',
+                'content' => 'Contenido del articulo'
+            ],
+            'relationships' => [
+                'category' => [
+                    'links' => [
+                        'self' => route('api.v1.articles.relationships.category', $article),
+                        'related' => route('api.v1.articles.category', $article),
+                    ],
                 ],
-                'links' => [
-                    'self' => route('api.v1.articles.show', $article)
-                ]
+            ],
+            'links' => [
+                'self' => route('api.v1.articles.show', $article)
             ]
-        ]);
-    }
+        ]
+    ]);
+}
+
 
     /** @test */
     public function title_is_required(): void

@@ -12,58 +12,55 @@ class JsonApiTestResponse
 
     public function assertJsonApiValidationErrors(): Closure
     {
-
-        return  function($attribute){
+        return function ($attribute) {
             /** @var TestResponse $this */
-           $pointer = Str::of($attribute)->startsWith('data') ? "/".str_replace('.', '/', $attribute) :
-            "/data/attributes/{$attribute}";
-            
-            try{
-    
+
+            $pointer = "/data/attributes/{$attribute}";
+
+            if (Str::of($attribute)->startsWith('data')) {
+                $pointer = "/".str_replace('.', '/', $attribute);
+            } elseif (Str::of($attribute)->startsWith('relationships')) {
+                $pointer = "/data/".str_replace('.', '/', $attribute).'/data/id';
+            }
+
+            try {
                 $this->assertJsonFragment([
                     'source' => ['pointer' => $pointer]
                 ]);
-            }catch(ExpectationFailedException $e){
-                PHPUnit::fail("Failed to find a JSON:API validation error for key: '{$attribute}'"
-                .PHP_EOL.PHP_EOL.
-                $e->getMessage()
-            );
-    
+            } catch (ExpectationFailedException $e) {
+                PHPUnit::fail(
+                    "Failed to find a JSON:API validation error for key: '{$attribute}'"
+                    .PHP_EOL.PHP_EOL.
+                    $e->getMessage()
+                );
             }
-    
-            try{
-    
+
+            try {
                 $this->assertJsonStructure([
                     'errors' => [
-                        [
-                            'title',
-                            'detail',
-                            'source' => ['pointer']
-                        ]
+                        ['title', 'detail', 'source' => ['pointer']]
                     ]
                 ]);
-            }catch(ExpectationFailedException $e){
-                PHPUnit::fail("Failed to find a valid JSON:API error response"
-                .PHP_EOL.PHP_EOL.
-                $e->getMessage()
-            );
-    
+            } catch (ExpectationFailedException $e) {
+                PHPUnit::fail(
+                    "Failed to find a valid JSON:API error response"
+                    .PHP_EOL.PHP_EOL.
+                    $e->getMessage()
+                );
             }
-    
-    
-           return $this->assertHeader(
+
+            return $this->assertHeader(
                 'content-type', 'application/vnd.api+json'
             )->assertStatus(422);
-         
-         };
-
+        };
     }
 
     public function assertJsonApiResource(): Closure
     {
-        return function ($model, $attributes){
+        return function ($model, $attributes) {
             /** @var TestResponse $this */
-           return $this->assertJson([
+
+            return $this->assertJson([
                 'data' => [
                     'type' => $model->getResourceType(),
                     'id' => (string) $model->getRouteKey(),
@@ -77,12 +74,34 @@ class JsonApiTestResponse
                 route('api.v1.'.$model->getResourceType().'.show', $model)
             );
         };
+    }
 
+    public function assertJsonApiRelationshipLinks(): Closure
+    {
+        return function($model, $relations) {
+            /** @var TestResponse $this */
+            foreach($relations as $relation) {
+                $this->assertJson([
+                    'data' => [
+                        'relationships' => [
+                            'category' => [
+                                'links' => [
+                                    'self' => route("api.v1.{$model->getResourceType()}.relationships.{$relation}", $model),
+                                    'related' => route("api.v1.{$model->getResourceType()}.{$relation}", $model)
+                                ]
+                            ]
+                        ]
+                    ]
+                ]);
+            }
+
+            return $this;
+        };
     }
 
     public function assertJsonApiResourceCollection(): Closure
     {
-        return function ($models, $attributesKeys){
+        return function ($models, $attributesKeys) {
             /** @var TestResponse $this */
 
             $this->assertJsonStructure([
@@ -93,9 +112,8 @@ class JsonApiTestResponse
                 ]
             ]);
 
-            foreach($models as $model){
+            foreach ($models as $model) {
                 $this->assertJsonFragment([
-
                     'type' => $model->getResourceType(),
                     'id' => (string) $model->getRouteKey(),
                     'links' => [
@@ -106,7 +124,6 @@ class JsonApiTestResponse
 
             return $this;
         };
-
     }
     
 }

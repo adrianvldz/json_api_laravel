@@ -15,12 +15,11 @@ class ListArticlesTest extends TestCase
     {
         $article = Article::factory()->create();
         $response = $this->getJson(route('api.v1.articles.show', $article));
-
         $response->assertJsonApiResource($article, [
             'title' => $article->title,
             'slug' => $article->slug,
             'content' => $article->content
-        ]);
+        ])->assertJsonApiRelationshipLinks($article, ['category']);
 
        
     }
