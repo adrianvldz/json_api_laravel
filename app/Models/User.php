@@ -14,6 +14,11 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+    public function getKeyType()
+    {
+        return "string";
+    }
+
     /**
      * The attributes that are mass assignable.
      *
