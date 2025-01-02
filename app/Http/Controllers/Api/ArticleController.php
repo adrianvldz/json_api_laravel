@@ -12,9 +12,18 @@ use App\Http\Requests\SaveArticleRequest;
 use App\Http\Resources\ArticleCollection;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Routing\Controllers\Middleware;
 
-class ArticleController extends Controller
+class ArticleController extends Controller implements \Illuminate\Routing\Controllers\HasMiddleware
 {
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware(middleware: 'auth:sanctum', only: ['store', 'update', 'destroy']),
+        ];
+    }
+
     public function show($article): JsonResource{
         $article = Article::where('slug', $article)
                 ->allowedIncludes(['category', 'author'])

@@ -13,6 +13,12 @@ class ValidateJsonApiDocument
    
     public function handle(Request $request, Closure $next): Response
     {
+
+        
+        // Excluir la ruta de login
+          if ($request->routeIs('api.v1.login')) {
+            return $next($request);
+        }
         if($request->isMethod('POST') || $request->isMethod('PATCH')){
             $request->validate([
                 'data' => ['required', 'array'],

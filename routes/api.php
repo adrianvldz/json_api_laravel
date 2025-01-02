@@ -2,14 +2,16 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\AuthorController;
 use App\Http\Controllers\Api\ArticleController;
+use App\Http\Middleware\ValidateJsonApiHeaders;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Middleware\ValidateJsonApiDocument;
 use App\Http\Controllers\Api\ArticleAuthorController;
 use App\Http\Controllers\Api\ArticleCategoryController;
 
-
-Route::name('api.v1.')->group(function(){
+Route::middleware([ValidateJsonApiHeaders::class, ValidateJsonApiDocument::class])->name('api.v1.')->group(function(){
 
     Route::apiResource('articles', ArticleController::class);
     
@@ -41,5 +43,8 @@ Route::name('api.v1.')->group(function(){
     Route::get('articles/{article}/author', 
     [ArticleAuthorController::class, 'show'])
     ->name('articles.author');
+
+    Route::post('login', LoginController::class)
+    ->name('login')->withoutMiddleware(ValidateJsonApiDocument::class);
 });
 

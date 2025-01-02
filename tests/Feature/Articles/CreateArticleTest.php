@@ -6,6 +6,7 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\Article;
 use App\Models\Category;
+use Laravel\Sanctum\Sanctum;
 use Illuminate\Testing\TestResponse;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -19,9 +20,11 @@ class CreateArticleTest extends TestCase
 public function can_create_articles(): void
 {
     $user = User::factory()->create();
-
     
     $category = Category::factory()->create();
+
+    Sanctum::actingAs($user);
+
     $response = $this->postJson(route('api.v1.articles.store'), [
         'title' => 'Nuevo artículo',
         'slug' => 'nuevo-articulo',
@@ -39,7 +42,7 @@ public function can_create_articles(): void
         route('api.v1.articles.show', $article)
     );
 
-    $response->assertExactJson([
+    $response->assertJson([
         'data' => [
             'type' => 'articles',
             'id' => (string) $article->getRouteKey(),
@@ -53,7 +56,7 @@ public function can_create_articles(): void
                     'links' => [
                         'self' => route('api.v1.articles.relationships.category', $article),
                         'related' => route('api.v1.articles.category', $article),
-                    ],
+                    ]
                 ],
             ],
             'links' => [
@@ -69,10 +72,21 @@ public function can_create_articles(): void
     ]);
 }
 
+ /** @test */
+ public function guests_cannot_create_articles(): void
+ {
+     $this->postJson(route('api.v1.articles.store'))
+     ->assertUnauthorized();
+ 
+
+     $this->assertDatabaseCount('articles', 0);
+ }
+
 
     /** @test */
     public function title_is_required(): void
     {
+        Sanctum::actingAs(User::factory()->create());
         $this->postJson(route('api.v1.articles.store'), [
             'slug' => 'nuevo-articulo',
             'content' => 'Contenido del articulo'
@@ -83,6 +97,8 @@ public function can_create_articles(): void
     /** @test */
     public function title_must_be_at_least_4_characters(): void
     {
+        Sanctum::actingAs(User::factory()->create());
+
         $this->postJson(route('api.v1.articles.store'), [
 
             'title' => 'Nue',
@@ -95,6 +111,8 @@ public function can_create_articles(): void
     /** @test */
     public function slug_is_required(): void
     {
+        Sanctum::actingAs(User::factory()->create());
+
         $this->postJson(route('api.v1.articles.store'), [
             'title' => 'Nuevo Artículo',
             'slug' => 'Nuevo Artículo',
@@ -105,6 +123,8 @@ public function can_create_articles(): void
     /** @test */
     public function slug_must_be_unique(): void
     {
+        Sanctum::actingAs(User::factory()->create());
+
         $article = Article::factory()->create();
         $this->postJson(route('api.v1.articles.store'), [
             'title' => 'Nuevo Artículo',
@@ -116,6 +136,7 @@ public function can_create_articles(): void
     /** @test */
     public function slug_must_only_contain_letters_numbers_and_dashes(): void
     {
+        Sanctum::actingAs(User::factory()->create());
 
         $this->postJson(route('api.v1.articles.store'), [
             'title' => 'Nuevo Artículo',
@@ -127,6 +148,7 @@ public function can_create_articles(): void
     /** @test */
     public function slug_must_not_contain_underscores(): void
     {
+        Sanctum::actingAs(User::factory()->create());
 
         $this->postJson(route('api.v1.articles.store'), [
             'title' => 'Nuevo Artículo',
@@ -140,6 +162,7 @@ public function can_create_articles(): void
     /** @test */
     public function slug_must_not_start_with_dashes(): void
     {
+        Sanctum::actingAs(User::factory()->create());
 
         $this->postJson(route('api.v1.articles.store'), [
             'title' => 'Nuevo Artículo',
@@ -153,7 +176,8 @@ public function can_create_articles(): void
        /** @test */
        public function slug_must_not_end_with_dashes(): void
        {
-   
+        Sanctum::actingAs(User::factory()->create());
+
            $this->postJson(route('api.v1.articles.store'), [
                'title' => 'Nuevo Artículo',
                'slug' => 'end-with-dashes-',
@@ -166,6 +190,8 @@ public function can_create_articles(): void
     /** @test */
     public function content_is_required(): void
     {
+        Sanctum::actingAs(User::factory()->create());
+
         $this->postJson(route('api.v1.articles.store'), [
             'title' => 'Nuevo Artículo',
             'slug' => 'nuevo-articulo'
@@ -175,6 +201,8 @@ public function can_create_articles(): void
       /** @test */
       public function category_relationship_is_required(): void
       {
+        Sanctum::actingAs(User::factory()->create());
+
           $this->postJson(route('api.v1.articles.store'), [
               'title' => 'Nuevo Artículo',
               'slug' => 'nuevo-articulo',
@@ -186,6 +214,8 @@ public function can_create_articles(): void
         /** @test */
         public function category_must_exist_in_database(): void
         {
+            Sanctum::actingAs(User::factory()->create());
+
             $this->postJson(route('api.v1.articles.store'), [
                 'title' => 'Nuevo Artículo',
                 'slug' => 'nuevo-articulo',

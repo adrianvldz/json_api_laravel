@@ -16,8 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
         apiPrefix: 'api/v1'
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->append(ValidateJsonApiHeaders::class);
-        $middleware->append(ValidateJsonApiDocument::class);
+        //$middleware->append(ValidateJsonApiHeaders::class);
+        //$middleware->append(ValidateJsonApiDocument::class);
+        
     })
     ->withExceptions(function (Exceptions $exceptions) {
         return \App\Exceptions\Handler::class;

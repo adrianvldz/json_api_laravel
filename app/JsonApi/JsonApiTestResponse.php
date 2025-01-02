@@ -22,7 +22,7 @@ class JsonApiTestResponse
                         '*' => ['title', 'detail']
                     ]
                 ]);
-            }catch(InvalidArgumentException $e){
+            }catch(ExpectationFailedException $e){
                 PHPUnit::fail(
                     "Error Objects Must be returned as an array keyed by errors in the top level of a JSON:API document"
                     .PHP_EOL.PHP_EOL.
