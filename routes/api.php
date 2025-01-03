@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\AuthorController;
 use App\Http\Controllers\Api\LogoutController;
@@ -15,6 +16,8 @@ use App\Http\Controllers\Api\ArticleCategoryController;
 Route::middleware([ValidateJsonApiHeaders::class, ValidateJsonApiDocument::class])->name('api.v1.')->group(function () {
 
     Route::apiResource('articles', ArticleController::class);
+
+    Route::apiResource('comments', CommentController::class);
 
     Route::apiResource('categories', CategoryController::class)->only('index', 'show');
 
