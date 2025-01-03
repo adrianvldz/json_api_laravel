@@ -4,20 +4,19 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Str;
-use app\Models\Traits\HasUuid;
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasApiTokens, HasFactory, Notifiable;
 
     public function getKeyType()
     {
-        return "string";
+        return 'string';
     }
 
     /**
@@ -58,11 +57,12 @@ class User extends Authenticatable
 
     public function getIncrementing()
     {
-        return false;   
+        return false;
     }
+
     protected static function booted()
     {
-        static::creating(function($model){
+        static::creating(function ($model) {
             $model->id = Str::uuid()->toString();
         });
 

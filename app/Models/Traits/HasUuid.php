@@ -8,11 +8,12 @@ trait HasUuid
 {
     public function getIncrementing()
     {
-        return false;   
+        return false;
     }
+
     protected static function booted()
     {
-        static::creating(function($model){
+        static::creating(function ($model) {
             $model->id = Str::uuid()->toString();
         });
 

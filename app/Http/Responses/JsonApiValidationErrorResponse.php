@@ -12,16 +12,12 @@ class JsonApiValidationErrorResponse extends JsonResponse
         $data = $this->formatJsonApiErrors($exception);
 
         $headers = [
-            'content-type' => 'application/vnd.api+json'
+            'content-type' => 'application/vnd.api+json',
         ];
 
         parent::__construct($data, $status, $headers);
     }
 
-    /**
-     * @param ValidationException $exception
-     * @return array
-     */
     protected function formatJsonApiErrors(ValidationException $exception): array
     {
         $title = $exception->getMessage();
@@ -33,10 +29,10 @@ class JsonApiValidationErrorResponse extends JsonResponse
                         'title' => $title,
                         'detail' => $messages[0],
                         'source' => [
-                            'pointer' => "/" . str_replace('.', '/', $field)
-                        ]
+                            'pointer' => '/'.str_replace('.', '/', $field),
+                        ],
                     ];
-                })->values()
+                })->values(),
         ];
     }
 }

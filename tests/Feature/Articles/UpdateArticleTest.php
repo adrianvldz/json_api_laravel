@@ -3,25 +3,24 @@
 namespace Tests\Feature\Articles;
 
 use Tests\TestCase;
-use App\Models\Article;
 use App\Models\User;
+use App\Models\Article;
+use App\Models\Category;
 use Laravel\Sanctum\Sanctum;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class UpdateArticleTest extends TestCase
 {
     use RefreshDatabase;
+
     /** @test */
     public function guests_cannot_update_articles(): void
     {
         $article = Article::factory()->create();
 
-
         $response = $this->patchJson(route('api.v1.articles.update', $article))
-        ->assertUnauthorized();
+            ->assertUnauthorized();
 
-       
     }
 
     /** @test */
@@ -34,33 +33,61 @@ class UpdateArticleTest extends TestCase
         $response = $this->patchJson(route('api.v1.articles.update', $article), [
             'title' => 'Updated article',
             'slug' => $article->slug,
-            'content' => 'Updated content'
+            'content' => 'Updated content',
         ])->assertOk();
 
-       
-
         $response->assertJsonApiResource($article, [
-          
-                    'title' => 'Updated article',
-                    'slug' => $article->slug,
-                    'content' => 'Updated content'
-            ]);
+
+            'title' => 'Updated article',
+            'slug' => $article->slug,
+            'content' => 'Updated content',
+        ]);
     }
 
-     /** @test */
-     public function cannot_update_articles_owned_by_other_users(): void
-     {
-         $article = Article::factory()->create();
- 
-         Sanctum::actingAs(User::factory()->create());
- 
+    /** @test */
+    public function can_update_owned_articles_with_relationships(): void
+    {
+        $article = Article::factory()->create();
+        $category = Category::factory()->create();
+
+        Sanctum::actingAs($article->author, ['article:update']);
+
+        $response = $this->patchJson(route('api.v1.articles.update', $article), [
+            'title' => 'Updated article',
+            'slug' => $article->slug,
+            'content' => 'Updated content',
+            '_relationships' => [
+                'category' => $category,
+            ],
+        ])->assertOk();
+
+        $response->assertJsonApiResource($article, [
+
+            'title' => 'Updated article',
+            'slug' => $article->slug,
+            'content' => 'Updated content',
+        ]);
+
+        $this->assertDatabaseHas('articles', [
+            'title' => 'Updated article',
+            'category_id' => $category->id,
+        ]);
+    }
+
+    /** @test */
+    public function cannot_update_articles_owned_by_other_users(): void
+    {
+        $article = Article::factory()->create();
+
+        Sanctum::actingAs(User::factory()->create());
+
         $this->patchJson(route('api.v1.articles.update', $article), [
-             'title' => 'Updated article',
-             'slug' => $article->slug,
-             'content' => 'Updated content'
-         ])->assertForbidden();
- 
-     }
+            'title' => 'Updated article',
+            'slug' => $article->slug,
+            'content' => 'Updated content',
+        ])->assertForbidden();
+
+    }
 
     /** @test */
     public function title_is_required(): void
@@ -71,7 +98,7 @@ class UpdateArticleTest extends TestCase
 
         $this->patchJson(route('api.v1.articles.update', $article), [
             'slug' => 'updated-article',
-            'content' => 'Article content'
+            'content' => 'Article content',
 
         ])->dump()->assertJsonApiValidationErrors('title');
     }
@@ -88,7 +115,7 @@ class UpdateArticleTest extends TestCase
 
             'title' => 'Nue',
             'slug' => 'updated-article',
-            'content' => 'Article content'
+            'content' => 'Article content',
 
         ])->assertJsonApiValidationErrors('title');
     }
@@ -103,7 +130,7 @@ class UpdateArticleTest extends TestCase
         $this->patchJson(route('api.v1.articles.update', $article), [
             'title' => 'Updated article',
             'slug' => 'updated-article',
-            'content' => 'Article content'
+            'content' => 'Article content',
         ])->assertJsonApiValidationErrors('slug');
     }
 
@@ -117,7 +144,7 @@ class UpdateArticleTest extends TestCase
         $this->postJson(route('api.v1.articles.update', $article), [
             'title' => 'Nuevo Artículo',
             'slug' => '$%^&',
-            'content' => 'Contenido del articulo'
+            'content' => 'Contenido del articulo',
         ])->assertJsonApiValidationErrors('slug')->dump();
     }
 
@@ -131,9 +158,9 @@ class UpdateArticleTest extends TestCase
         $this->postJson(route('api.v1.articles.update', $article), [
             'title' => 'Nuevo Artículo',
             'slug' => 'witch_underscores',
-            'content' => 'Contenido del articulo'
+            'content' => 'Contenido del articulo',
         ])->assertSee(trans('validation.no_underscores', [
-            'attribute' => 'data.attributes.slug'
+            'attribute' => 'data.attributes.slug',
         ]))->assertJsonApiValidationErrors('slug');
     }
 
@@ -147,9 +174,9 @@ class UpdateArticleTest extends TestCase
         $this->postJson(route('api.v1.articles.update', $article), [
             'title' => 'Nuevo Artículo',
             'slug' => '-starts-with-dashes',
-            'content' => 'Contenido del articulo'
+            'content' => 'Contenido del articulo',
         ])->assertSee(trans('validation.no_starting_dashes', [
-            'attribute' => 'data.attributes.slug'
+            'attribute' => 'data.attributes.slug',
         ]))->assertJsonApiValidationErrors('slug');
     }
 
@@ -163,12 +190,11 @@ class UpdateArticleTest extends TestCase
         $this->postJson(route('api.v1.articles.update', $article), [
             'title' => 'Nuevo Artículo',
             'slug' => 'end-with-dashes-',
-            'content' => 'Contenido del articulo'
+            'content' => 'Contenido del articulo',
         ])->assertSee(trans('validation.no_ending_dashes', [
-            'attribute' => 'data.attributes.slug'
+            'attribute' => 'data.attributes.slug',
         ]))->assertJsonApiValidationErrors('slug');
     }
-
 
     /** @test */
     public function slug_must_be_unique(): void
@@ -178,14 +204,12 @@ class UpdateArticleTest extends TestCase
 
         Sanctum::actingAs($article1->author);
 
-
         $this->patchJson(route('api.v1.articles.update', $article1), [
             'title' => 'Nuevo Artículo',
             'slug' => $article2->slug,
-            'content' => 'Contenido del articulo'
+            'content' => 'Contenido del articulo',
         ])->assertJsonApiValidationErrors('slug');
     }
-
 
     /** @test */
     public function content_is_required(): void
@@ -195,7 +219,7 @@ class UpdateArticleTest extends TestCase
 
         $this->patchJson(route('api.v1.articles.update', $article), [
             'title' => 'Updated article',
-            'slug' => 'updated-article'
+            'slug' => 'updated-article',
         ])->assertJsonApiValidationErrors('content');
     }
 }

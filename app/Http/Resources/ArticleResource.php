@@ -2,23 +2,21 @@
 
 namespace App\Http\Resources;
 
-use App\Http\Resources\AuthorResource;
 use App\JsonApi\Traits\JsonApiResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ArticleResource extends JsonResource
 {
-
     use JsonApiResource;
 
     public function toJsonApi(): array
     {
-       return [
+        return [
             'title' => $this->resource->title,
             'slug' => $this->resource->slug,
             'content' => $this->resource->content,
-            
-       ];
+
+        ];
     }
 
     public function getRelationshipLinks(): array
@@ -30,11 +28,7 @@ class ArticleResource extends JsonResource
     {
         return [
             CategoryResource::make($this->whenLoaded('category')),
-            AuthorResource::make($this->whenLoaded('author'))
+            AuthorResource::make($this->whenLoaded('author')),
         ];
     }
-    
- 
-
-
 }

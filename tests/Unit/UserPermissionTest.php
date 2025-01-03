@@ -24,17 +24,17 @@ class UserPermissionTest extends TestCase
 
     }
 
-      /** @test */
-      public function cannot_assign_the_same_permission_twice(): void
-      {
-          $user = User::factory()->create();
-  
-          $permission = Permission::factory()->create();
-  
-          $user->givePermissionTo($permission);
-          $user->givePermissionTo($permission);
-  
-          $this->assertCount(1, $user->fresh()->permissions);
-  
-      }
+    /** @test */
+    public function cannot_assign_the_same_permission_twice(): void
+    {
+        $user = User::factory()->create();
+
+        $permission = Permission::factory()->create();
+
+        $user->givePermissionTo($permission);
+        $user->givePermissionTo($permission);
+
+        $this->assertCount(1, $user->fresh()->permissions);
+
+    }
 }

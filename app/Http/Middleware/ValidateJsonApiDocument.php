@@ -10,16 +10,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ValidateJsonApiDocument
 {
-   
     public function handle(Request $request, Closure $next): Response
     {
 
-        
         // Excluir la ruta de login
-          if ($request->routeIs('api.v1.login')) {
+        if ($request->routeIs('api.v1.login')) {
             return $next($request);
         }
-        if($request->isMethod('POST') || $request->isMethod('PATCH')){
+        if ($request->isMethod('POST') || $request->isMethod('PATCH')) {
             $request->validate([
                 'data' => ['required', 'array'],
                 'data.type' => ['required', 'string'],
@@ -27,14 +25,14 @@ class ValidateJsonApiDocument
                     Rule::requiredIf(
                         ! Str::of(request()->url())->contains('relationships')
                     ),
-                    'array'
-                ]
+                    'array',
+                ],
             ]);
         }
 
-        if($request->isMethod('PATCH')){
+        if ($request->isMethod('PATCH')) {
             $request->validate([
-                'data.id' => ['required', 'string']
+                'data.id' => ['required', 'string'],
             ]);
         }
 

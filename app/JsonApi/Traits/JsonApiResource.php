@@ -4,7 +4,6 @@ namespace App\JsonApi\Traits;
 
 use App\JsonApi\Document;
 use Illuminate\Http\Request;
-use App\Http\Resources\CategoryResource;
 use Illuminate\Http\Resources\MissingValue;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -20,26 +19,25 @@ trait JsonApiResource
     public function toArray(Request $request): array
     {
 
-        if($request->filled('include')){
+        if ($request->filled('include')) {
 
-            foreach($this->getIncludes() as $include){
-                if($include->resource instanceof MissingValue){
+            foreach ($this->getIncludes() as $include) {
+                if ($include->resource instanceof MissingValue) {
                     continue;
                 }
                 $this->with['included'][] = $include;
             }
         }
 
-
         return Document::type($this->resource->getResourceType())
-        ->id($this->resource->getRouteKey())
-        ->attributes($this->filterAttributes($this->toJsonApi()))
-        ->relationshipLinks($this->getRelationshipLinks())
-        ->links([
-            'self' => route('api.v1.'.$this->resource->getResourceType().'.show', $this->resource)
+            ->id($this->resource->getRouteKey())
+            ->attributes($this->filterAttributes($this->toJsonApi()))
+            ->relationshipLinks($this->getRelationshipLinks())
+            ->links([
+                'self' => route('api.v1.'.$this->resource->getResourceType().'.show', $this->resource),
 
-        ])->get('data');
- 
+            ])->get('data');
+
     }
 
     public function getIncludes(): array
@@ -47,12 +45,13 @@ trait JsonApiResource
         return [];
     }
 
-    public function getRelationshipLinks() : array
+    public function getRelationshipLinks(): array
     {
         return [];
     }
 
-    public function withResponse($request, $response){
+    public function withResponse($request, $response)
+    {
 
         $response->header(
             'Location',
@@ -63,14 +62,14 @@ trait JsonApiResource
 
     public function filterAttributes(array $attributes): array
     {
-        return array_filter($attributes, function($value){
-            
-            if(request()->isNotFilled('fields')){
+        return array_filter($attributes, function ($value) {
+
+            if (request()->isNotFilled('fields')) {
                 return true;
             }
             $fields = explode(',', request('fields.'.$this->getResourceType()));
 
-            if($value === $this->getRouteKey()){
+            if ($value === $this->getRouteKey()) {
                 return in_array($this->getRouteKeyName(), $fields);
             }
 
@@ -82,11 +81,11 @@ trait JsonApiResource
     public static function collection($resources): AnonymousResourceCollection
     {
         $collection = parent::collection($resources);
-        if(request()->filled('include')){
+        if (request()->filled('include')) {
 
-            foreach($resources as $resource){
-                foreach($resource->getIncludes() as $include){
-                    if($include->resource instanceof MissingValue){
+            foreach ($resources as $resource) {
+                foreach ($resource->getIncludes() as $include) {
+                    if ($include->resource instanceof MissingValue) {
                         continue;
                     }
                     $collection->with['included'][] = $include;
@@ -98,5 +97,4 @@ trait JsonApiResource
 
         return $collection;
     }
-
 }

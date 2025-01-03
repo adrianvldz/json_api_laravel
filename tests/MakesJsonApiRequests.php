@@ -1,24 +1,27 @@
 <?php
+
 namespace Tests;
 
-use Closure;
 use App\JsonApi\Document;
 use Illuminate\Support\Str;
 
 trait MakesJsonApiRequests
 {
     protected bool $formatJsonApiDocument = true;
+
     protected bool $addJsonApiHeaders = true;
 
     public function withoutJsonApiHeaders(): self
     {
         $this->addJsonApiHeaders = false;
+
         return $this;
     }
 
     public function withoutJsonApiDocumentFormatting(): self
     {
         $this->formatJsonApiDocument = false;
+
         return $this;
 
     }
@@ -33,36 +36,32 @@ trait MakesJsonApiRequests
 
     public function json($method, $uri, array $data = [], array $headers = [], $options = 0)
     {
-        if($this->addJsonApiHeaders){
+        if ($this->addJsonApiHeaders) {
 
             $headers['accept'] = 'application/vnd.api+json';
 
-            if($method === 'POST' || $method === 'PATCH'){
+            if ($method === 'POST' || $method === 'PATCH') {
 
                 $headers['content-type'] = 'application/vnd.api+json';
             }
 
         }
 
-        if($this->formatJsonApiDocument){
+        if ($this->formatJsonApiDocument) {
 
-            if(! isset($data['data'])){
+            if (! isset($data['data'])) {
 
                 $formattedData = $this->getFormattedData($uri, $data);
             }
 
         }
 
-
-       return parent::json($method, $uri, $formattedData ?? $data, $headers, $options);
+        return parent::json($method, $uri, $formattedData ?? $data, $headers, $options);
     }
 
-   
+    protected function getFormattedData($uri, array $data): array
+    {
 
-
-    protected function getFormattedData($uri, array $data): array{
-
-        
         $path = parse_url($uri)['path'];
         $type = (string) Str::of($path)->after('api/v1/')->before('/');
         $id = (string) Str::of($path)->after($type)->replace('/', '');
@@ -74,6 +73,4 @@ trait MakesJsonApiRequests
             ->toArray();
 
     }
-
-    
 }

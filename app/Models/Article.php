@@ -29,9 +29,10 @@ class Article extends Model
         'user_id' => 'string',
     ];
 
-   // public $resourceType = 'articles';
+    // public $resourceType = 'articles';
 
-    public function getRouteKeyName(){
+    public function getRouteKeyName()
+    {
         return 'slug';
     }
 
@@ -51,7 +52,6 @@ class Article extends Model
 
     }
 
-    
     public function scopeMonth(Builder $query, $month)
     {
         $query->whereMonth('created_at', $month);
@@ -61,10 +61,8 @@ class Article extends Model
     public function scopeCategories(Builder $query, $categories)
     {
         $categoriesSlugs = explode(',', $categories);
-        $query->whereHas('category', function($q) use ($categoriesSlugs){
+        $query->whereHas('category', function ($q) use ($categoriesSlugs) {
             $q->whereIn('slug', $categoriesSlugs);
         });
     }
-
-
 }

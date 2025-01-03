@@ -3,28 +3,27 @@
 namespace App\JsonApi;
 
 use Closure;
-use Exception;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
-use InvalidArgumentException;
 use PHPUnit\Framework\Assert as PHPUnit;
 use PHPUnit\Framework\ExpectationFailedException;
+
 class JsonApiTestResponse
 {
-    public function assertJsonApiError():Closure
+    public function assertJsonApiError(): Closure
     {
-        return function ($title = null, $detail = null, $status = null){
+        return function ($title = null, $detail = null, $status = null) {
             /** @var TestResponse $this */
-            try{
+            try {
 
                 $this->assertJsonStructure([
                     'errors' => [
-                        '*' => ['title', 'detail']
-                    ]
+                        '*' => ['title', 'detail'],
+                    ],
                 ]);
-            }catch(ExpectationFailedException $e){
+            } catch (ExpectationFailedException $e) {
                 PHPUnit::fail(
-                    "Error Objects Must be returned as an array keyed by errors in the top level of a JSON:API document"
+                    'Error Objects Must be returned as an array keyed by errors in the top level of a JSON:API document'
                     .PHP_EOL.PHP_EOL.
                     $e->getMessage()
                 );
@@ -32,7 +31,7 @@ class JsonApiTestResponse
             $title && $this->assertJsonFragment(['title' => $title]);
             $detail && $this->assertJsonFragment(['detail' => $detail]);
             $status && $this->assertJsonFragment(['status' => $status])
-            ->assertStatus((int)$status);
+                ->assertStatus((int) $status);
 
             return $this;
         };
@@ -42,18 +41,17 @@ class JsonApiTestResponse
     {
         return function ($attribute) {
             /** @var TestResponse $this */
-
             $pointer = "/data/attributes/{$attribute}";
 
             if (Str::of($attribute)->startsWith('data')) {
-                $pointer = "/".str_replace('.', '/', $attribute);
+                $pointer = '/'.str_replace('.', '/', $attribute);
             } elseif (Str::of($attribute)->startsWith('relationships')) {
-                $pointer = "/data/".str_replace('.', '/', $attribute).'/data/id';
+                $pointer = '/data/'.str_replace('.', '/', $attribute).'/data/id';
             }
 
             try {
                 $this->assertJsonFragment([
-                    'source' => ['pointer' => $pointer]
+                    'source' => ['pointer' => $pointer],
                 ]);
             } catch (ExpectationFailedException $e) {
                 PHPUnit::fail(
@@ -66,12 +64,12 @@ class JsonApiTestResponse
             try {
                 $this->assertJsonStructure([
                     'errors' => [
-                        ['title', 'detail', 'source' => ['pointer']]
-                    ]
+                        ['title', 'detail', 'source' => ['pointer']],
+                    ],
                 ]);
             } catch (ExpectationFailedException $e) {
                 PHPUnit::fail(
-                    "Failed to find a valid JSON:API error response"
+                    'Failed to find a valid JSON:API error response'
                     .PHP_EOL.PHP_EOL.
                     $e->getMessage()
                 );
@@ -94,9 +92,9 @@ class JsonApiTestResponse
                     'id' => (string) $model->getRouteKey(),
                     'attributes' => $attributes,
                     'links' => [
-                        'self' => route('api.v1.'.$model->getResourceType().'.show', $model)
-                    ]
-                ]
+                        'self' => route('api.v1.'.$model->getResourceType().'.show', $model),
+                    ],
+                ],
             ])->assertHeader(
                 'Location',
                 route('api.v1.'.$model->getResourceType().'.show', $model)
@@ -106,20 +104,20 @@ class JsonApiTestResponse
 
     public function assertJsonApiRelationshipLinks(): Closure
     {
-        return function($model, $relations) {
+        return function ($model, $relations) {
             /** @var TestResponse $this */
-            foreach($relations as $relation) {
+            foreach ($relations as $relation) {
                 $this->assertJson([
                     'data' => [
                         'relationships' => [
                             $relation => [
                                 'links' => [
                                     'self' => route("api.v1.{$model->getResourceType()}.relationships.{$relation}", $model),
-                                    'related' => route("api.v1.{$model->getResourceType()}.{$relation}", $model)
-                                ]
-                            ]
-                        ]
-                    ]
+                                    'related' => route("api.v1.{$model->getResourceType()}.{$relation}", $model),
+                                ],
+                            ],
+                        ],
+                    ],
                 ]);
             }
 
@@ -131,13 +129,12 @@ class JsonApiTestResponse
     {
         return function ($models, $attributesKeys) {
             /** @var TestResponse $this */
-
             $this->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'attributes' => $attributesKeys
-                    ]
-                ]
+                        'attributes' => $attributesKeys,
+                    ],
+                ],
             ]);
 
             foreach ($models as $model) {
@@ -145,13 +142,12 @@ class JsonApiTestResponse
                     'type' => $model->getResourceType(),
                     'id' => (string) $model->getRouteKey(),
                     'links' => [
-                        'self' => route('api.v1.'.$model->getResourceType().'.show', $model)
-                    ]
+                        'self' => route('api.v1.'.$model->getResourceType().'.show', $model),
+                    ],
                 ]);
             }
 
             return $this;
         };
     }
-    
 }

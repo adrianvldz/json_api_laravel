@@ -3,15 +3,14 @@
 namespace Tests\Feature\Articles;
 
 use Tests\TestCase;
-use App\Models\User;
 use App\Models\Article;
 use App\Models\Category;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CategoryRelationshipTest extends TestCase
 {
     use RefreshDatabase;
+
     /** @test */
     public function can_fetch_the_associated_category_identifier(): void
     {
@@ -22,8 +21,8 @@ class CategoryRelationshipTest extends TestCase
         $response->assertExactJson([
             'data' => [
                 'id' => $article->category->getRouteKey(),
-                'type' => 'categories'
-            ]
+                'type' => 'categories',
+            ],
         ]);
     }
 
@@ -39,9 +38,9 @@ class CategoryRelationshipTest extends TestCase
                 'id' => $article->category->getRouteKey(),
                 'type' => 'categories',
                 'attributes' => [
-                    'name' => $article->category->name
-                ]
-            ]
+                    'name' => $article->category->name,
+                ],
+            ],
         ]);
     }
 
@@ -53,51 +52,43 @@ class CategoryRelationshipTest extends TestCase
 
         $url = route('api.v1.articles.relationships.category', $article);
 
-
         $response = $this->patchJson($url, [
             'data' => [
                 'type' => 'categories',
-                'id' => $category->getRouteKey()
-            ]
+                'id' => $category->getRouteKey(),
+            ],
         ]);
 
         $response->assertExactJson([
-            'data'  => [
+            'data' => [
                 'type' => 'categories',
-                'id' => $category->getRouteKey()
-            ]
+                'id' => $category->getRouteKey(),
+            ],
         ]);
 
         $this->assertDatabaseHas('articles', [
             'title' => $article->title,
-            'category_id' => $category->id
+            'category_id' => $category->id,
         ]);
     }
 
-     /** @test */
-     public function category_must_exist_in_database(): void
-     {
-         $article = Article::factory()->create();
- 
-         $url = route('api.v1.articles.relationships.category', $article);
- 
- 
-         $this->patchJson($url, [
-             'data' => [
-                 'type' => 'categories',
-                 'id' => 'non-existing'
-             ]
-         ])->assertJsonApiValidationErrors('data.id');
- 
-       
- 
-         $this->assertDatabaseHas('articles', [
-             'title' => $article->title,
-             'category_id' => $article->_category_id
-         ]);
-     }
+    /** @test */
+    public function category_must_exist_in_database(): void
+    {
+        $article = Article::factory()->create();
 
+        $url = route('api.v1.articles.relationships.category', $article);
 
+        $this->patchJson($url, [
+            'data' => [
+                'type' => 'categories',
+                'id' => 'non-existing',
+            ],
+        ])->assertJsonApiValidationErrors('data.id');
 
-
+        $this->assertDatabaseHas('articles', [
+            'title' => $article->title,
+            'category_id' => $article->_category_id,
+        ]);
+    }
 }

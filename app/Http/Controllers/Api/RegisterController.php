@@ -16,10 +16,10 @@ class RegisterController extends Controller implements \Illuminate\Routing\Contr
     public static function middleware(): array
     {
         return [
-            new Middleware(middleware: 'guest:sanctum')
+            new Middleware(middleware: 'guest:sanctum'),
         ];
     }
-    
+
     public function __invoke(Request $request)
     {
         $request->validate([
@@ -35,6 +35,6 @@ class RegisterController extends Controller implements \Illuminate\Routing\Contr
         ]);
 
         return new TokenResponse($user);
-        
+
     }
 }
