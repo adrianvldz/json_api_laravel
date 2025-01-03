@@ -4,9 +4,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\AuthorController;
+use App\Http\Controllers\Api\LogoutController;
 use App\Http\Controllers\Api\ArticleController;
 use App\Http\Middleware\ValidateJsonApiHeaders;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\RegisterController;
 use App\Http\Middleware\ValidateJsonApiDocument;
 use App\Http\Controllers\Api\ArticleAuthorController;
 use App\Http\Controllers\Api\ArticleCategoryController;
@@ -44,7 +46,20 @@ Route::middleware([ValidateJsonApiHeaders::class, ValidateJsonApiDocument::class
     [ArticleAuthorController::class, 'show'])
     ->name('articles.author');
 
-    Route::post('login', LoginController::class)
-    ->name('login')->withoutMiddleware(ValidateJsonApiDocument::class);
+    Route::withoutMiddleware([
+        ValidateJsonApiDocument::class, 
+        ValidateJsonApiHeaders::class
+    ])->group(function() {
+        Route::post('login', LoginController::class)
+        ->name('login');
+    
+        Route::post('logout', LogoutController::class)
+        ->name('logout');
+    
+        Route::post('register', RegisterController::class)
+        ->name('register');
+    });
 });
+
+
 

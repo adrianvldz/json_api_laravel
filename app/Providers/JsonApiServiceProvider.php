@@ -2,13 +2,14 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use App\JsonApi\JsonApiQueryBuilder;
 use App\JsonApi\JsonApiTestResponse;
-use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Testing\TestResponse;
+use Illuminate\Support\ServiceProvider;
 use PHPUnit\Framework\Assert as PHPUnit;
+use Illuminate\Database\Eloquent\Builder;
 use PHPUnit\Framework\ExpectationFailedException;
 
 
@@ -29,5 +30,12 @@ class JsonApiServiceProvider extends ServiceProvider
     {
         Builder::mixin(new JsonApiQueryBuilder());
        TestResponse::mixin(new JsonApiTestResponse());
+
+       Request::macro('isJsonApi', function (){
+            if($this->header('accept') === 'application/vnd.api+json'){
+                return true;
+            }
+            return $this->header('content-type') === 'application/vnd.api+json';
+       });
     }
 }

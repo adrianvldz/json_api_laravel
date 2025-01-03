@@ -1,9 +1,11 @@
 <?php
 
-use App\Http\Middleware\ValidateJsonApiDocument;
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Application;
-use Illuminate\Contracts\Debug\ExceptionHandler;
 use App\Http\Middleware\ValidateJsonApiHeaders;
+use App\Http\Middleware\ValidateJsonApiDocument;
+use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
@@ -24,3 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         return \App\Exceptions\Handler::class;
 
     })->create();
+
+    $middleware->redirectUsersTo(function (Request $request) {
+        throw_if($request->is('api/v1/*') || $request->expectsJson(), UnauthorizedException::class);
+    });

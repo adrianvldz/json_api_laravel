@@ -8,18 +8,48 @@ use Illuminate\Support\Str;
 trait MakesJsonApiRequests
 {
     protected bool $formatJsonApiDocument = true;
+    protected bool $addJsonApiHeaders = true;
 
+    public function withoutJsonApiHeaders(): self
+    {
+        $this->addJsonApiHeaders = false;
+        return $this;
+    }
 
-    public function withoutJsonApiDocumentFormatting(){
+    public function withoutJsonApiDocumentFormatting(): self
+    {
         $this->formatJsonApiDocument = false;
+        return $this;
+
+    }
+
+    public function withoutJsonApiHelpers(): self
+    {
+        $this->addJsonApiHeaders = false;
+        $this->formatJsonApiDocument = false;
+
+        return $this;
     }
 
     public function json($method, $uri, array $data = [], array $headers = [], $options = 0)
     {
-        $headers['accept'] = 'application/vnd.api+json';
+        if($this->addJsonApiHeaders){
+
+            $headers['accept'] = 'application/vnd.api+json';
+
+            if($method === 'POST' || $method === 'PATCH'){
+
+                $headers['content-type'] = 'application/vnd.api+json';
+            }
+
+        }
 
         if($this->formatJsonApiDocument){
-            $formattedData = $this->getFormattedData($uri, $data);
+
+            if(! isset($data['data'])){
+
+                $formattedData = $this->getFormattedData($uri, $data);
+            }
 
         }
 
@@ -27,24 +57,7 @@ trait MakesJsonApiRequests
        return parent::json($method, $uri, $formattedData ?? $data, $headers, $options);
     }
 
-    public function postJson($uri, array $data = [], array $headers = [], $options =0)
-    {
-
-        $headers['content-type'] = 'application/vnd.api+json';
-
-        return parent::postJson( $uri, $data, $headers, $options);
-
-    }
-
-    
-    public function patchJson($uri, array $data = [], array $headers = [], $options = 0)
-    {
-
-        $headers['content-type'] = 'application/vnd.api+json';
-
-        return parent::patchJson( $uri, $data, $headers, $options);
-
-    }
+   
 
 
     protected function getFormattedData($uri, array $data): array{
@@ -61,4 +74,6 @@ trait MakesJsonApiRequests
             ->toArray();
 
     }
+
+    
 }

@@ -6,11 +6,22 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Middleware\ValidateJsonApiDocument;
+use App\Http\Responses\TokenResponse;
 use Illuminate\Validation\ValidationException;
+use App\Http\Middleware\ValidateJsonApiDocument;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
-class LoginController extends Controller
+class LoginController extends Controller implements \Illuminate\Routing\Controllers\HasMiddleware
 {
+    use AuthorizesRequests;
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware(middleware: 'guest:sanctum'),
+        ];
+    }
     
    
     public function __invoke(Request $request)
@@ -23,22 +34,14 @@ class LoginController extends Controller
         ]);
         $user = User::whereEmail($request->email)->first();
 
+
         if(! $user || ! Hash::check($request->password, $user->password)){
             throw ValidationException::withMessages([
                 'email' => [__('auth.failed')]
             ]);
         }
 
-
-        //generate token
-        $plainTextToken = $user->createToken(
-            $request->device_name,
-            [] //user permissions
-            )->plainTextToken;
-
-        return response()->json([
-            'plain-text-token' => $plainTextToken
-        ]);
+        return new TokenResponse($user);
 
     }
 }

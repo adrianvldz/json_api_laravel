@@ -29,7 +29,7 @@ class Handler extends ExceptionHandler
     }
     protected function invalidJson($request, ValidationException $exception): JsonResponse
     {
-        if(!$request->routeIs('api.v1.login')){
+        if($request->isJsonApi()){
 
             return new JsonApiValidationErrorResponse($exception);
         }
