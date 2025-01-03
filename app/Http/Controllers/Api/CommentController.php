@@ -18,7 +18,7 @@ class CommentController extends Controller implements \Illuminate\Routing\Contro
     public static function middleware(): array
     {
         return [
-            new Middleware(middleware: 'auth:sanctum', only: ['store']),
+            new Middleware(middleware: 'auth:sanctum', only: ['store', 'update', 'destroy']),
         ];
     }
    
@@ -52,13 +52,33 @@ class CommentController extends Controller implements \Illuminate\Routing\Contro
     }
 
    
-    public function update(Request $request, Comment $comment)
+    public function update(SaveCommentRequest $request, Comment $comment)
     {
-        //
+        $this->authorize('update', $comment);
+
+        $comment->body = $request->input('data.attributes.body');
+
+        if($request->hasRelationship('article')){
+
+            $articleSlug = $request->getRelationshipId('article');
+            $comment->article_id = Article::whereSlug($articleSlug)->firstOrFail()->id;
+        }
+
+        if($request->hasRelationship('author')){
+            $comment->user_id = $request->getRelationshipId('author');
+        }
+
+
+        $comment->save();
+
+        return CommentResource::make($comment);
     }
 
     public function destroy(Comment $comment)
     {
-        //
+        $this->authorize('delete'); 
+        $comment->delete();
+
+        return response()->noContent();
     }
 }
