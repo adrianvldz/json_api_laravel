@@ -67,4 +67,14 @@ class User extends Authenticatable
         });
 
     }
+
+    public function permissions()
+    {
+        return $this->belongsToMany(Permission::class);
+    }
+
+    public function givePermissionTo(Permission $permission)
+    {
+        $this->permissions()->syncWithoutDetaching($permission);
+    }
 }

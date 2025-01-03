@@ -23,7 +23,7 @@ public function can_create_articles(): void
     
     $category = Category::factory()->create();
 
-    Sanctum::actingAs($user);
+    Sanctum::actingAs($user, ['article:create']);
 
     $response = $this->postJson(route('api.v1.articles.store'), [
         'title' => 'Nuevo artículo',
