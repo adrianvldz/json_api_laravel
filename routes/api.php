@@ -78,6 +78,8 @@ Route::middleware([ValidateJsonApiHeaders::class, ValidateJsonApiDocument::class
                 Route::get('relationships/comments','index')
                 ->name('articles.relationships.comments');
 
+                Route::patch('relationships/comments', 'update');
+
                 Route::get('comments', 'show')->name('articles.comments');
             });
     });
