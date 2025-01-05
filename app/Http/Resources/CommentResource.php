@@ -17,4 +17,9 @@ class CommentResource extends JsonResource
         ];
     }
 
+    public function getRelationshipLinks(): array
+    {
+        return ['article', 'author'];
+    }
+
 }

@@ -39,7 +39,7 @@ class ArticleController extends Controller implements \Illuminate\Routing\Contro
     {
 
         $articles = Article::query()
-            ->allowedIncludes(['category', 'author'])
+            ->allowedIncludes(['category', 'author', 'comments'])
             ->allowedFilters(['title', 'content', 'year', 'month', 'categories'])
             ->allowedSorts(['title', 'content'])
             ->sparseFieldSet()

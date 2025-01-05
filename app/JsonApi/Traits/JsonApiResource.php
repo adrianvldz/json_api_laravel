@@ -92,9 +92,13 @@ trait JsonApiResource
         if (request()->filled('include')) {
             foreach ($collection->resource as $resource) {
                 foreach ($resource->getIncludes() as $include) {
-                    if ($include->resource instanceof MissingValue) {
+                    
+                    if ($include->resource instanceof Collection) {
+                        $include->resource->each(fn ($r) => $collection->with['included'][] = $r);
                         continue;
                     }
+
+                    $include->resource instanceof MissingValue ? :
                     $collection->with['included'][] = $include;
                 }
             }
