@@ -11,6 +11,7 @@ class Comment extends Model
     /** @use HasFactory<\Database\Factories\CommentFactory> */
     use HasFactory;
 
+
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
