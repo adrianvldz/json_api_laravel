@@ -13,6 +13,7 @@ use App\Http\Middleware\ValidateJsonApiDocument;
 use App\Http\Controllers\Api\ArticleAuthorController;
 use App\Http\Controllers\Api\CommentArticleController;
 use App\Http\Controllers\Api\ArticleCategoryController;
+use App\Http\Controllers\Api\ArticleCommentsController;
 use App\Http\Controllers\Api\CommentAuthorController;
 
 Route::middleware([ValidateJsonApiHeaders::class, ValidateJsonApiDocument::class])->name('api.v1.')->group(function () {
@@ -63,8 +64,6 @@ Route::middleware([ValidateJsonApiHeaders::class, ValidateJsonApiDocument::class
             });
         
             Route::controller(ArticleAuthorController::class)->group(function (){
-        
-        
                 Route::get('relationships/author','index')
                     ->name('articles.relationships.author');
             
@@ -73,6 +72,13 @@ Route::middleware([ValidateJsonApiHeaders::class, ValidateJsonApiDocument::class
             
                 Route::get('author','show')
                     ->name('articles.author');
+            });
+
+            Route::controller(ArticleCommentsController::class)->group(function (){
+                Route::get('relationships/comments','index')
+                ->name('articles.relationships.comments');
+
+                Route::get('comments', 'show')->name('articles.comments');
             });
     });
 

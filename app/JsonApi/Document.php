@@ -15,12 +15,29 @@ class Document extends Collection
         ]);
     }
 
+    public static function empty(): array
+    {
+        return [
+            'data' => [],
+        ];
+    }
+
     public function id($id): Document
     {
         if ($id) {
 
             $this->items['data']['id'] = (string) $id;
         }
+
+        return $this;
+    }
+
+    public function ids(Collection $resources): Document
+    {
+       $this->items['data'] = $resources->map(fn ($resource) => [
+          'id' => (string) $resource->getRouteKey(),
+          'type' => $resource->getResourceType( )
+       ]);
 
         return $this;
     }
