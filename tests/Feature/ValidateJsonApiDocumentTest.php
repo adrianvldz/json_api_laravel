@@ -6,6 +6,7 @@ use Tests\TestCase;
 use Illuminate\Support\Facades\Route;
 use LaravelJsonApi\Testing\MakesJsonApiRequests;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\JsonApi\Http\Middleware\ValidateJsonApiDocument;
 
 class ValidateJsonApiDocumentTest extends TestCase
 {
@@ -19,7 +20,7 @@ class ValidateJsonApiDocumentTest extends TestCase
 
         Route::any('api/test-route', function () {
             return 'OK';
-        })->middleware(\App\Http\Middleware\ValidateJsonApiDocument::class);
+        })->middleware(ValidateJsonApiDocument::class);
     }
 
     /** @test */

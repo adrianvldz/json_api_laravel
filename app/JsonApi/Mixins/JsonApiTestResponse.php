@@ -1,6 +1,6 @@
 <?php
 
-namespace App\JsonApi;
+namespace App\JsonApi\Mixins;
 
 use Closure;
 use Illuminate\Support\Str;
@@ -86,7 +86,7 @@ class JsonApiTestResponse
         return function ($model, $attributes) {
             /** @var TestResponse $this */
 
-            return $this->assertJson([
+            $this->assertJson([
                 'data' => [
                     'type' => $model->getResourceType(),
                     'id' => (string) $model->getRouteKey(),
@@ -95,10 +95,16 @@ class JsonApiTestResponse
                         'self' => route('api.v1.'.$model->getResourceType().'.show', $model),
                     ],
                 ],
-            ])->assertHeader(
-                'Location',
-                route('api.v1.'.$model->getResourceType().'.show', $model)
-            );
+            ]);
+            if($this->status() === 201){
+
+                $this->assertHeader(
+                    'Location',
+                    route('api.v1.'.$model->getResourceType().'.show', $model)
+                );
+            }
+
+            return $this;
         };
     }
 

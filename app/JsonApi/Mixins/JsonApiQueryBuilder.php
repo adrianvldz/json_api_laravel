@@ -1,11 +1,11 @@
 <?php
 
-namespace App\JsonApi;
+namespace App\JsonApi\Mixins;
 
 use Closure;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
-use App\Exceptions\JsonApi\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class JsonApiQueryBuilder
 {
