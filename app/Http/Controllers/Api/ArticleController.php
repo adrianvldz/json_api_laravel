@@ -40,8 +40,8 @@ class ArticleController extends Controller implements \Illuminate\Routing\Contro
 
         $articles = Article::query()
             ->allowedIncludes(['category', 'author', 'comments'])
-            ->allowedFilters(['title', 'content', 'year', 'month', 'categories'])
-            ->allowedSorts(['title', 'content'])
+            ->allowedFilters(['title', 'content', 'year', 'month', 'categories', 'authors'])
+            ->allowedSorts(['title', 'content', 'authors'])
             ->sparseFieldSet()
             ->jsonPaginate();
 

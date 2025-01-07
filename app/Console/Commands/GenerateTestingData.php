@@ -54,7 +54,7 @@ class GenerateTestingData extends Command
         $this->line($user->createToken('Adrian')->plainTextToken);
 
         $this->info('Article ID:');
-        $this->line($user->articles->first()->slug);
+        $this->line($articles->first()->slug);
 
         $this->info('Category ID:');
         $this->line($articles->first()->category->slug);
